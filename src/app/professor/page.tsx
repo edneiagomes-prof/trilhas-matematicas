@@ -76,7 +76,7 @@ export default async function ProfessorDashboard() {
         })}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <Link
           href="/professor/alunos"
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
@@ -88,6 +88,12 @@ export default async function ProfessorDashboard() {
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
         >
           📋 Gerenciar Turmas
+        </Link>
+        <Link
+          href="/professor/trilhas"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+        >
+          🗺️ Gerenciar Trilhas
         </Link>
       </div>
     </div>
