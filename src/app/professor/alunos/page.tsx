@@ -34,15 +34,17 @@ export default function AlunosPage() {
     const res = await fetch("/api/professor/alunos");
     const data = await res.json();
     setAlunos(data);
-    const ts: Turma[] = [];
-    data.forEach((a: Aluno) => {
-      if (a.turma && !ts.find((t) => t.id === a.turma!.id)) ts.push(a.turma);
-    });
-    setTurmas(ts);
+  }
+
+  async function fetchTurmas() {
+    const res = await fetch("/api/professor/turmas");
+    const data = await res.json();
+    setTurmas(data);
   }
 
   useEffect(() => {
     fetchAlunos();
+    fetchTurmas();
   }, []);
 
   const filtered =
@@ -69,6 +71,7 @@ export default function AlunosPage() {
     setShowModal(false);
     setForm({ name: "", username: "", password: "", turmaId: "" });
     fetchAlunos();
+    fetchTurmas();
     setTimeout(() => setSuccess(""), 3000);
   }
 

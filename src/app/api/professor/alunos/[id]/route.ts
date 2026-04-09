@@ -7,14 +7,15 @@ import { SessionData, sessionOptions } from "@/lib/session";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "teacher") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
+  const { id } = await params;
   const user = await prisma.user.findUnique({
-    where: { id: Number(params.id) },
+    where: { id: Number(id) },
     include: {
       turma: true,
       tentativas: {
@@ -33,18 +34,19 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "teacher") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
+  const { id } = await params;
   const { password } = await req.json();
   if (!password)
     return NextResponse.json({ error: "Senha obrigatória" }, { status: 400 });
   const hashed = await bcrypt.hash(password, 10);
   await prisma.user.update({
-    where: { id: Number(params.id) },
+    where: { id: Number(id) },
     data: { password: hashed },
   });
   return NextResponse.json({ ok: true });

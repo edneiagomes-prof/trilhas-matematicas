@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { SessionData, sessionOptions } from "@/lib/session";
 
 export async function GET() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "student") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }

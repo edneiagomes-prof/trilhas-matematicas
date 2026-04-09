@@ -7,7 +7,7 @@ import { SessionData, sessionOptions } from "@/lib/session";
 type Respostas = Record<number, "A" | "B" | "C" | "D">;
 
 export async function POST(req: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "student") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }

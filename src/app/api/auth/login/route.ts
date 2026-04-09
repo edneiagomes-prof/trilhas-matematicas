@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }
-    const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+    const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
     session.userId = user.id;
     session.username = user.username;
     session.name = user.name;

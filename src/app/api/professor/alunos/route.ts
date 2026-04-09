@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { SessionData, sessionOptions } from "@/lib/session";
 
 export async function GET() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "teacher") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
@@ -29,7 +29,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
   if (!session.userId || session.role !== "teacher") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
