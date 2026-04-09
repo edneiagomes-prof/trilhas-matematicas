@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  username   String      @unique
+  name       String
+  password   String
+  role       String
+  turmaId    Int?
+  turma      Turma?      @relation(fields: [turmaId], references: [id])
+  tentativas Tentativa[]
+  createdAt  DateTime    @default(now())
+}
+
+model Turma {
+  id     Int    @id @default(autoincrement())
+  nome   String @unique
+  alunos User[]
+}
+
+model Trilha {
+  id      Int      @id @default(autoincrement())
+  titulo  String
+  semana  Int
+  ordem   Int
+  missoes Missao[]
+}
+
+model Missao {
+  id         Int         @id @default(autoincrement())
+  trilhaId   Int
+  trilha     Trilha      @relation(fields: [trilhaId], references: [id])
+  nivel      Int
+  titulo     String
+  descricao  String
+  xp         Int
+  questoes   Questao[]
+  tentativas Tentativa[]
+}
+
+model Questao {
+  id        Int    @id @default(autoincrement())
+  missaoId  Int
+  missao    Missao @relation(fields: [missaoId], references: [id])
+  enunciado String
+  opcaoA    String
+  opcaoB    String
+  opcaoC    String
+  opcaoD    String
+  correta   String
+  ordem     Int
+}
+
+model Tentativa {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  missaoId  Int
+  missao    Missao   @relation(fields: [missaoId], references: [id])
+  pontos    Int
+  xpGanho   Int
+  respostas String
+  createdAt DateTime @default(now())
+}

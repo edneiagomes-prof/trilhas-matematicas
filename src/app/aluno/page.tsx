@@ -1,0 +1,184 @@
+import Link from "next/link";
+import { requireStudent } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+
+const SEMANA_INFO = [
+  {
+    emoji: "🔢",
+    cor: "from-blue-400 to-blue-600",
+    bgCard: "bg-blue-50",
+    border: "border-blue-300",
+  },
+  {
+    emoji: "🏰",
+    cor: "from-purple-400 to-purple-600",
+    bgCard: "bg-purple-50",
+    border: "border-purple-300",
+  },
+  {
+    emoji: "🛒",
+    cor: "from-green-400 to-green-600",
+    bgCard: "bg-green-50",
+    border: "border-green-300",
+  },
+  {
+    emoji: "⚔️",
+    cor: "from-red-400 to-red-600",
+    bgCard: "bg-red-50",
+    border: "border-red-300",
+  },
+];
+
+const NIVEL_INFO = ["🌱", "⚡", "🌟", "🔥"];
+
+export default async function AlunoDashboard() {
+  const session = await requireStudent();
+  if (!session) redirect("/login");
+
+  const trilhas = await prisma.trilha.findMany({
+    include: {
+      missoes: {
+        include: {
+          tentativas: {
+            where: { userId: session.userId },
+            orderBy: { pontos: "desc" },
+            take: 1,
+          },
+        },
+        orderBy: { nivel: "asc" },
+      },
+    },
+    orderBy: { semana: "asc" },
+  });
+
+  const allTentativas = await prisma.tentativa.findMany({
+    where: { userId: session.userId },
+  });
+  const totalXp = allTentativas.reduce((s, t) => s + t.xpGanho, 0);
+
+  const turma = session.turmaId
+    ? await prisma.turma.findUnique({ where: { id: session.turmaId } })
+    : null;
+
+  function getLevel(xp: number) {
+    if (xp >= 200)
+      return { label: "Mestre Matemático", emoji: "🏆", next: null, max: 200 };
+    if (xp >= 100)
+      return { label: "Estrategista", emoji: "⚔️", next: 200, max: 200 };
+    if (xp >= 50)
+      return { label: "Explorador", emoji: "🌟", next: 100, max: 100 };
+    return { label: "Aprendiz", emoji: "🌱", next: 50, max: 50 };
+  }
+  const level = getLevel(totalXp);
+
+  return (
+    <div>
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl p-6 mb-8 shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Olá, {session.name}! 👋</h1>
+            {turma && <p className="text-indigo-200">Turma: {turma.nome}</p>}
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-3xl">{level.emoji}</span>
+              <div>
+                <div className="font-bold text-lg">{level.label}</div>
+                <div className="text-indigo-200 text-sm">⭐ {totalXp} XP total</div>
+              </div>
+            </div>
+          </div>
+          {level.next && (
+            <div className="bg-white bg-opacity-20 rounded-2xl p-4 min-w-48">
+              <div className="text-sm text-indigo-100 mb-1">
+                Próximo nível: {level.next} XP
+              </div>
+              <div className="bg-white bg-opacity-30 rounded-full h-3">
+                <div
+                  className="bg-yellow-400 h-3 rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, (totalXp / level.max) * 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="text-xs text-indigo-200 mt-1">
+                {totalXp}/{level.max} XP
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <h2 className="text-2xl font-bold text-gray-700 mb-6">
+        🗺️ Trilhas de Aventura
+      </h2>
+      <div className="space-y-8">
+        {trilhas.map((trilha, idx) => {
+          const info = SEMANA_INFO[idx % 4];
+          const missoesCompletas = trilha.missoes.filter(
+            (m) => m.tentativas.length > 0
+          ).length;
+          return (
+            <div
+              key={trilha.id}
+              className={`bg-white rounded-3xl shadow-lg overflow-hidden border-2 ${info.border}`}
+            >
+              <div
+                className={`bg-gradient-to-r ${info.cor} text-white p-5`}
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-3xl mr-2">{info.emoji}</span>
+                    <span className="text-xl font-bold">{trilha.titulo}</span>
+                    <span className="ml-3 text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                      Semana {trilha.semana}
+                    </span>
+                  </div>
+                  <div className="text-right text-sm">
+                    <div className="font-bold">
+                      {missoesCompletas}/{trilha.missoes.length} missões
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+                {trilha.missoes.map((missao) => {
+                  const tentativa = missao.tentativas[0];
+                  const feita = !!tentativa;
+                  return (
+                    <Link
+                      key={missao.id}
+                      href={`/aluno/missao/${missao.id}`}
+                      className={`rounded-2xl p-4 text-center transition-all hover:scale-105 border-2 ${
+                        feita
+                          ? `${info.bgCard} ${info.border} shadow`
+                          : "bg-gray-50 border-gray-200 hover:border-indigo-300"
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">
+                        {NIVEL_INFO[missao.nivel - 1]}
+                      </div>
+                      <div className="text-xs font-bold text-gray-600 mb-1">
+                        Nível {missao.nivel}
+                      </div>
+                      <div className="text-sm font-semibold text-gray-700 leading-tight">
+                        {missao.titulo}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {missao.xp} XP
+                      </div>
+                      {feita && (
+                        <div className="mt-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                          ✅ {tentativa.pontos}pts
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
