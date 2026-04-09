@@ -4,13 +4,15 @@ import { getIronSession } from "iron-session";
 import { prisma } from "@/lib/prisma";
 import { SessionData, sessionOptions } from "@/lib/session";
 
+type Respostas = Record<number, "A" | "B" | "C" | "D">;
+
 export async function POST(req: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   if (!session.userId || session.role !== "student") {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
-  const { missaoId, respostas } = await req.json();
-  // respostas: { [questaoId]: "A"|"B"|"C"|"D" }
+  const { missaoId, respostas }: { missaoId: number; respostas: Respostas } =
+    await req.json();
   const missao = await prisma.missao.findUnique({
     where: { id: Number(missaoId) },
     include: { questoes: true },

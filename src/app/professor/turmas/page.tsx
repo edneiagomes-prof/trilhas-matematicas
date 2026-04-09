@@ -16,8 +16,12 @@ export default async function TurmasPage() {
       <div className="space-y-6">
         {turmas.map((turma) => {
           const xpTotal = turma.alunos.reduce(
-            (s, a) =>
-              s + a.tentativas.reduce((s2, t) => s2 + t.xpGanho, 0),
+            (totalXp, aluno) =>
+              totalXp +
+              aluno.tentativas.reduce(
+                (studentXp, t) => studentXp + t.xpGanho,
+                0
+              ),
             0
           );
           return (
