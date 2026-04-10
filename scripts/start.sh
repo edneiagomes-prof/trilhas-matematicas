@@ -13,5 +13,21 @@ fi
 echo "→ Executando migrações Prisma (timeout 60s)..."
 timeout 60 ./node_modules/.bin/prisma migrate deploy || echo "⚠ Migrações falharam ou excederam timeout — continuando inicialização"
 
+echo "→ Verificando se o banco precisa de seed..."
+USER_COUNT=$(node -e "
+const { PrismaClient } = require('@prisma/client');
+const p = new PrismaClient();
+p.user.count()
+  .then(n => { process.stdout.write(String(n)); return p.\$disconnect(); })
+  .catch(() => { process.stdout.write('0'); return p.\$disconnect(); });
+" 2>/dev/null || echo "0")
+
+if [ "$USER_COUNT" = "0" ]; then
+  echo "🌱 Banco vazio — executando seed..."
+  npm run seed
+else
+  echo "✅ Banco já populado ($USER_COUNT usuários) — seed ignorado"
+fi
+
 echo "→ Iniciando Next.js na porta ${PORT:-3000}..."
 exec ./node_modules/.bin/next start -p "${PORT:-3000}"
