@@ -5,7 +5,15 @@ if [ -n "$DATABASE_URL" ]; then
   DB_FILE=$(echo "$DATABASE_URL" | sed 's|^file:||')
   DB_DIR=$(dirname "$DB_FILE")
   mkdir -p "$DB_DIR"
+  echo "→ DATABASE_URL: $DATABASE_URL"
   echo "→ Diretório do banco: $DB_DIR"
+  # Aviso: no Railway, o banco SQLite deve estar em um Volume persistente.
+  # Configure um Volume no dashboard Railway montado em /data e use DATABASE_URL=file:/data/prod.db
+  if [ "$DB_DIR" = "." ] || [ "$DB_DIR" = "/app" ] || [ "$DB_DIR" = "/app/prisma" ]; then
+    echo "⚠ ATENÇÃO: O banco está em diretório efêmero ($DB_DIR)."
+    echo "⚠ No Railway, os dados serão perdidos a cada redeploy/restart."
+    echo "⚠ Configure um Volume no Railway Dashboard montado em /data e defina DATABASE_URL=file:/data/prod.db"
+  fi
 else
   echo "⚠ DATABASE_URL não definida — o banco de dados não funcionará"
 fi
