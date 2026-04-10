@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed": "ts-node --transpile-only prisma/seed.ts",
+    "seed": "node prisma/seed.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -14,9 +14,9 @@
     "bcryptjs": "^2.4.3",
     "iron-session": "^8.0.1",
     "next": "^15.5.15",
+    "prisma": "^5.13.0",
     "react": "^18",
-    "react-dom": "^18",
-    "ts-node": "^10.9.2"
+    "react-dom": "^18"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -25,8 +25,8 @@
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
-    "prisma": "^5.13.0",
     "tailwindcss": "^3.3.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

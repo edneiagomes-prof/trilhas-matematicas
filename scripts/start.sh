@@ -24,7 +24,7 @@ p.user.count()
 
 if [ "$USER_COUNT" = "0" ]; then
   echo "🌱 Banco vazio — executando seed..."
-  ./node_modules/.bin/ts-node --transpile-only prisma/seed.ts || echo "⚠ Seed falhou — verifique os logs acima"
+  node prisma/seed.js || echo "⚠ Seed falhou — verifique os logs acima"
 else
   echo "✅ Banco já populado ($USER_COUNT usuários) — seed ignorado"
 fi
