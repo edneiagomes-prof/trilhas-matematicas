@@ -7,17 +7,14 @@ Plataforma gamificada de matemática para o ensino fundamental brasileiro.
 - Node.js 18+
 - npm
 
-## Configuração
+## Configuração (primeira vez)
 
 ```bash
 # Instalar dependências
 npm install
 
-# Gerar o Prisma Client
-npx prisma generate
-
-# Criar o banco de dados e rodar as migrações
-npx prisma migrate dev --name init
+# Criar o banco de dados e aplicar as migrações
+npx prisma migrate dev
 
 # Popular o banco com dados de exemplo
 npm run seed
@@ -30,6 +27,20 @@ npm run dev
 ```
 
 Acesse [http://localhost:3000](http://localhost:3000).
+
+## Atualizando o banco de dados (após puxar novas alterações)
+
+Sempre que houver uma nova migração no repositório, execute:
+
+```bash
+# Aplicar as migrações pendentes
+npx prisma migrate dev
+
+# Re-popular o banco com os dados atualizados
+npm run seed
+```
+
+> **Importante:** após atualizar o banco, faça **logout** e **login** novamente no navegador para que a sessão reflita os novos campos.
 
 ## Credenciais padrão
 
