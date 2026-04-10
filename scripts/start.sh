@@ -10,8 +10,8 @@ else
   echo "⚠ DATABASE_URL não definida — o banco de dados não funcionará"
 fi
 
-echo "→ Executando migrações Prisma..."
-npx prisma migrate deploy || echo "⚠ Migrações falharam — continuando inicialização"
+echo "→ Executando migrações Prisma (timeout 60s)..."
+timeout 60 ./node_modules/.bin/prisma migrate deploy || echo "⚠ Migrações falharam ou excederam timeout — continuando inicialização"
 
 echo "→ Iniciando Next.js na porta ${PORT:-3000}..."
-exec npx next start -p "${PORT:-3000}"
+exec ./node_modules/.bin/next start -p "${PORT:-3000}"
