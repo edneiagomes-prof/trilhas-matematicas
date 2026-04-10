@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import ProgressBar from "@/components/ProgressBar";
 import { getNivelInfo } from "@/lib/niveis";
 
@@ -101,12 +102,20 @@ export default function AlunoDetailPage() {
 
   return (
     <div>
-      <button
-        onClick={() => router.back()}
-        className="text-indigo-600 hover:underline mb-4 flex items-center gap-1"
-      >
-        ← Voltar
-      </button>
+      <div className="flex items-center gap-4 mb-4">
+        <button
+          onClick={() => router.back()}
+          className="text-indigo-600 hover:underline flex items-center gap-1"
+        >
+          ← Voltar
+        </button>
+        <Link
+          href="/professor"
+          className="text-gray-500 hover:text-indigo-600 hover:underline flex items-center gap-1 text-sm"
+        >
+          🏠 Painel
+        </Link>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-white rounded-2xl shadow p-6">

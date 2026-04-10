@@ -160,7 +160,7 @@ export default function AlunosPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md overflow-y-auto max-h-[90vh]">
             <h2 className="text-2xl font-bold text-indigo-700 mb-6">
               ➕ Criar Novo Aluno
             </h2>

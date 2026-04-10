@@ -189,12 +189,20 @@ export default function TrilhaDetailPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link
-            href="/professor/trilhas"
-            className="text-sm text-indigo-600 hover:underline mb-1 inline-block"
-          >
-            ← Trilhas
-          </Link>
+          <div className="flex items-center gap-4 mb-1">
+            <Link
+              href="/professor/trilhas"
+              className="text-sm text-indigo-600 hover:underline inline-block"
+            >
+              ← Trilhas
+            </Link>
+            <Link
+              href="/professor"
+              className="text-sm text-gray-500 hover:text-indigo-600 hover:underline inline-block"
+            >
+              🏠 Painel
+            </Link>
+          </div>
           <h1 className="text-3xl font-bold text-indigo-700">
             🎯 {trilha.titulo}
           </h1>
