@@ -1,14 +1,19 @@
 import { SessionOptions } from "iron-session";
 
-const secret = process.env.SESSION_SECRET;
-if (!secret || secret.length < 32) {
-  throw new Error(
-    "SESSION_SECRET deve ser definida com pelo menos 32 caracteres"
-  );
+function getSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "SESSION_SECRET deve ser definida com pelo menos 32 caracteres"
+    );
+  }
+  return secret;
 }
 
 export const sessionOptions: SessionOptions = {
-  password: secret,
+  get password() {
+    return getSecret();
+  },
   cookieName: "trilhas-session",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
