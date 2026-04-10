@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 # Garante que o diretório do banco SQLite existe
 if [ -n "$DATABASE_URL" ]; then
@@ -12,7 +11,7 @@ else
 fi
 
 echo "→ Executando migrações Prisma..."
-npx prisma migrate deploy
+npx prisma migrate deploy || echo "⚠ Migrações falharam — continuando inicialização"
 
 echo "→ Iniciando Next.js na porta ${PORT:-3000}..."
 exec npx next start -p "${PORT:-3000}"

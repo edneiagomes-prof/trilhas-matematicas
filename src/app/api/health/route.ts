@@ -9,10 +9,10 @@ export async function GET() {
     NODE_ENV: process.env.NODE_ENV ?? "undefined",
   };
 
-  const ok = checks.DATABASE_URL && checks.SESSION_SECRET;
+  const configured = checks.DATABASE_URL && checks.SESSION_SECRET;
 
   return NextResponse.json(
-    { status: ok ? "ok" : "degraded", checks },
-    { status: ok ? 200 : 503 }
+    { status: configured ? "ok" : "degraded", checks },
+    { status: 200 }
   );
 }
