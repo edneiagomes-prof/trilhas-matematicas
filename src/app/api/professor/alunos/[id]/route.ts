@@ -41,13 +41,20 @@ export async function PUT(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
   const { id } = await params;
-  const { password } = await req.json();
-  if (!password)
-    return NextResponse.json({ error: "Senha obrigatória" }, { status: 400 });
-  const hashed = await bcrypt.hash(password, 10);
+  const { password, nivel } = await req.json();
+  if (!password && nivel === undefined)
+    return NextResponse.json({ error: "Nenhum campo para atualizar" }, { status: 400 });
+  const data: Record<string, unknown> = {};
+  if (password) {
+    const hashed = await bcrypt.hash(password, 10);
+    data.password = hashed;
+  }
+  if (nivel !== undefined) {
+    data.nivel = Number(nivel);
+  }
   await prisma.user.update({
     where: { id: Number(id) },
-    data: { password: hashed },
+    data,
   });
   return NextResponse.json({ ok: true });
 }

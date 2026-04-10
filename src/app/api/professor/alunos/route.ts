@@ -22,6 +22,7 @@ export async function GET() {
     id: a.id,
     username: a.username,
     name: a.name,
+    nivel: a.nivel,
     turma: a.turma,
     totalXp: a.tentativas.reduce((sum, t) => sum + t.xpGanho, 0),
   }));
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
   try {
-    const { name, username, password, turmaId } = await req.json();
+    const { name, username, password, turmaId, nivel } = await req.json();
     if (!name || !username || !password || !turmaId) {
       return NextResponse.json(
         { error: "Todos os campos são obrigatórios" },
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
         password: hashed,
         role: "student",
         turmaId: Number(turmaId),
+        nivel: Number(nivel) || 1,
       },
     });
     return NextResponse.json({

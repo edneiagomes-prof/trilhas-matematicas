@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { getNivelInfo } from "@/lib/niveis";
 
 interface Questao {
   id: number;
@@ -31,7 +32,6 @@ interface Resultado {
   xpGanho: number;
 }
 
-const NIVEL_EMOJI = ["🌱", "⚡", "🌟", "🔥"];
 const OPCOES = ["A", "B", "C", "D"] as const;
 
 export default function MissaoPage() {
@@ -87,7 +87,7 @@ export default function MissaoPage() {
       </div>
     );
 
-  const nivelEmoji = NIVEL_EMOJI[missao.nivel - 1];
+  const nivelInfo = getNivelInfo(missao.nivel);
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -100,10 +100,10 @@ export default function MissaoPage() {
 
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-3xl p-6 mb-6 shadow-lg">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">{nivelEmoji}</span>
+          <span className="text-3xl">{nivelInfo.emoji}</span>
           <div>
             <div className="text-sm text-indigo-200">
-              {missao.trilha.titulo} • Nível {missao.nivel}
+              {missao.trilha.titulo} • Trilha {nivelInfo.label}
             </div>
             <h1 className="text-2xl font-bold">{missao.titulo}</h1>
           </div>

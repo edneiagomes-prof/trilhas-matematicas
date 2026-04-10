@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireStudent } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getNivelInfo } from "@/lib/niveis";
 
 const SEMANA_INFO = [
   {
@@ -30,15 +31,17 @@ const SEMANA_INFO = [
   },
 ];
 
-const NIVEL_INFO = ["🌱", "⚡", "🌟", "🔥"];
-
 export default async function AlunoDashboard() {
   const session = await requireStudent();
   if (!session) redirect("/login");
 
+  const alunoNivel = session.nivel ?? 1;
+  const nivelInfo = getNivelInfo(alunoNivel);
+
   const trilhas = await prisma.trilha.findMany({
     include: {
       missoes: {
+        where: { nivel: alunoNivel },
         include: {
           tentativas: {
             where: { userId: session.userId },
@@ -46,7 +49,7 @@ export default async function AlunoDashboard() {
             take: 1,
           },
         },
-        orderBy: { nivel: "asc" },
+        orderBy: { id: "asc" },
       },
     },
     orderBy: { semana: "asc" },
@@ -61,17 +64,6 @@ export default async function AlunoDashboard() {
     ? await prisma.turma.findUnique({ where: { id: session.turmaId } })
     : null;
 
-  function getLevel(xp: number) {
-    if (xp >= 200)
-      return { label: "Mestre Matemático", emoji: "🏆", next: null, max: 200 };
-    if (xp >= 100)
-      return { label: "Estrategista", emoji: "⚔️", next: 200, max: 200 };
-    if (xp >= 50)
-      return { label: "Explorador", emoji: "🌟", next: 100, max: 100 };
-    return { label: "Aprendiz", emoji: "🌱", next: 50, max: 50 };
-  }
-  const level = getLevel(totalXp);
-
   return (
     <div>
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-3xl p-6 mb-8 shadow-lg">
@@ -80,31 +72,19 @@ export default async function AlunoDashboard() {
             <h1 className="text-2xl font-bold">Olá, {session.name}! 👋</h1>
             {turma && <p className="text-indigo-200">Turma: {turma.nome}</p>}
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-3xl">{level.emoji}</span>
+              <span className="text-3xl">{nivelInfo.emoji}</span>
               <div>
-                <div className="font-bold text-lg">{level.label}</div>
+                <div className="font-bold text-lg">Trilha {nivelInfo.label}</div>
                 <div className="text-indigo-200 text-sm">⭐ {totalXp} XP total</div>
               </div>
             </div>
           </div>
-          {level.next && (
-            <div className="bg-white bg-opacity-20 rounded-2xl p-4 min-w-48">
-              <div className="text-sm text-indigo-100 mb-1">
-                Próximo nível: {level.next} XP
-              </div>
-              <div className="bg-white bg-opacity-30 rounded-full h-3">
-                <div
-                  className="bg-yellow-400 h-3 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, (totalXp / level.max) * 100)}%`,
-                  }}
-                />
-              </div>
-              <div className="text-xs text-indigo-200 mt-1">
-                {totalXp}/{level.max} XP
-              </div>
+          <div className="bg-white bg-opacity-20 rounded-2xl p-4 min-w-48">
+            <div className="text-sm text-indigo-100 mb-1">
+              XP acumulado
             </div>
-          )}
+            <div className="text-2xl font-bold text-yellow-300">⭐ {totalXp}</div>
+          </div>
         </div>
       </div>
 
@@ -112,7 +92,7 @@ export default async function AlunoDashboard() {
         🗺️ Trilhas de Aventura
       </h2>
       <div className="space-y-8">
-        {trilhas.map((trilha, idx) => {
+        {trilhas.filter((t) => t.missoes.length > 0).map((trilha, idx) => {
           const info = SEMANA_INFO[idx % 4];
           const missoesCompletas = trilha.missoes.filter(
             (m) => m.tentativas.length > 0
@@ -144,6 +124,7 @@ export default async function AlunoDashboard() {
                 {trilha.missoes.map((missao) => {
                   const tentativa = missao.tentativas[0];
                   const feita = !!tentativa;
+                  const mNivelInfo = getNivelInfo(missao.nivel);
                   return (
                     <Link
                       key={missao.id}
@@ -155,10 +136,10 @@ export default async function AlunoDashboard() {
                       }`}
                     >
                       <div className="text-2xl mb-1">
-                        {NIVEL_INFO[missao.nivel - 1]}
+                        {mNivelInfo.emoji}
                       </div>
-                      <div className="text-xs font-bold text-gray-600 mb-1">
-                        Nível {missao.nivel}
+                      <div className={`text-xs font-bold mb-1 ${mNivelInfo.color}`}>
+                        {mNivelInfo.label}
                       </div>
                       <div className="text-sm font-semibold text-gray-700 leading-tight">
                         {missao.titulo}

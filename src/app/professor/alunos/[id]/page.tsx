@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProgressBar from "@/components/ProgressBar";
+import { getNivelInfo } from "@/lib/niveis";
 
 interface Missao {
   id: number;
@@ -21,6 +22,7 @@ interface Aluno {
   id: number;
   name: string;
   username: string;
+  nivel: number;
   turma: { id: number; nome: string } | null;
   tentativas: Tentativa[];
 }
@@ -32,11 +34,17 @@ export default function AlunoDetailPage() {
   const [novaSenha, setNovaSenha] = useState("");
   const [senhaMsg, setSenhaMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [novoNivel, setNovoNivel] = useState("");
+  const [nivelMsg, setNivelMsg] = useState("");
+  const [nivelLoading, setNivelLoading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/professor/alunos/${params.id}`)
       .then((r) => r.json())
-      .then(setAluno);
+      .then((data) => {
+        setAluno(data);
+        setNovoNivel(String(data.nivel ?? 1));
+      });
   }, [params.id]);
 
   async function handleResetSenha(e: React.FormEvent) {
@@ -57,12 +65,31 @@ export default function AlunoDetailPage() {
     setTimeout(() => setSenhaMsg(""), 3000);
   }
 
+  async function handleAlterarNivel(e: React.FormEvent) {
+    e.preventDefault();
+    setNivelLoading(true);
+    const res = await fetch(`/api/professor/alunos/${params.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nivel: Number(novoNivel) }),
+    });
+    setNivelLoading(false);
+    if (res.ok) {
+      setNivelMsg("Trilha atualizada com sucesso! ✅");
+      setAluno((prev) => prev ? { ...prev, nivel: Number(novoNivel) } : prev);
+    } else {
+      setNivelMsg("Erro ao atualizar trilha.");
+    }
+    setTimeout(() => setNivelMsg(""), 3000);
+  }
+
   if (!aluno)
     return (
       <div className="text-center py-12 text-gray-400">Carregando...</div>
     );
 
   const totalXp = aluno.tentativas.reduce((s, t) => s + t.xpGanho, 0);
+  const nivelInfo = getNivelInfo(aluno.nivel);
   const melhorasPorMissao = aluno.tentativas.reduce(
     (acc, t) => {
       if (!acc[t.missao.id] || acc[t.missao.id].pontos < t.pontos)
@@ -92,6 +119,9 @@ export default function AlunoDetailPage() {
               <p className="text-purple-600 font-semibold mt-1">
                 {aluno.turma?.nome || "Sem turma"}
               </p>
+              <div className={`mt-3 inline-flex items-center gap-1 text-sm font-bold px-3 py-1 rounded-full ${nivelInfo.badgeBg} ${nivelInfo.badgeText}`}>
+                {nivelInfo.emoji} Trilha {nivelInfo.label}
+              </div>
               <div className="mt-4 bg-yellow-100 rounded-xl p-3">
                 <div className="text-2xl font-bold text-yellow-600">
                   ⭐ {totalXp} XP
@@ -99,6 +129,32 @@ export default function AlunoDetailPage() {
                 <div className="text-xs text-yellow-700">Total conquistado</div>
               </div>
             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-6">
+            <h2 className="font-bold text-gray-700 mb-3">🎯 Alterar Trilha</h2>
+            <form onSubmit={handleAlterarNivel} className="space-y-3">
+              <select
+                value={novoNivel}
+                onChange={(e) => setNovoNivel(e.target.value)}
+                className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-indigo-400 text-sm"
+              >
+                <option value="1">⬜ Branco</option>
+                <option value="2">🔵 Azul</option>
+                <option value="3">🟡 Amarelo</option>
+                <option value="4">🔴 Vermelho</option>
+              </select>
+              {nivelMsg && (
+                <p className="text-sm text-green-600">{nivelMsg}</p>
+              )}
+              <button
+                type="submit"
+                disabled={nivelLoading}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl text-sm transition-colors"
+              >
+                {nivelLoading ? "Salvando..." : "Alterar Trilha"}
+              </button>
+            </form>
           </div>
 
           <div className="bg-white rounded-2xl shadow p-6">
@@ -138,38 +194,41 @@ export default function AlunoDetailPage() {
               </p>
             ) : (
               <div className="space-y-4">
-                {Object.values(melhorasPorMissao).map((t) => (
-                  <div
-                    key={t.id}
-                    className="border-2 border-gray-100 rounded-xl p-4"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <div>
-                        <span className="font-semibold text-gray-800">
-                          {t.missao.titulo}
-                        </span>
-                        <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
-                          Nível {t.missao.nivel}
+                {Object.values(melhorasPorMissao).map((t) => {
+                  const mNivelInfo = getNivelInfo(t.missao.nivel);
+                  return (
+                    <div
+                      key={t.id}
+                      className="border-2 border-gray-100 rounded-xl p-4"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div>
+                          <span className="font-semibold text-gray-800">
+                            {t.missao.titulo}
+                          </span>
+                          <span className={`ml-2 text-xs font-bold px-2 py-0.5 rounded-full ${mNivelInfo.badgeBg} ${mNivelInfo.badgeText}`}>
+                            {mNivelInfo.emoji} {mNivelInfo.label}
+                          </span>
+                        </div>
+                        <span className="text-yellow-600 font-bold text-sm">
+                          ⭐ {t.xpGanho} XP
                         </span>
                       </div>
-                      <span className="text-yellow-600 font-bold text-sm">
-                        ⭐ {t.xpGanho} XP
-                      </span>
+                      <ProgressBar
+                        value={t.pontos}
+                        max={100}
+                        label="Pontuação"
+                        color={
+                          t.pontos >= 75
+                            ? "bg-green-500"
+                            : t.pontos >= 50
+                            ? "bg-yellow-500"
+                            : "bg-red-400"
+                        }
+                      />
                     </div>
-                    <ProgressBar
-                      value={t.pontos}
-                      max={100}
-                      label="Pontuação"
-                      color={
-                        t.pontos >= 75
-                          ? "bg-green-500"
-                          : t.pontos >= 50
-                          ? "bg-yellow-500"
-                          : "bg-red-400"
-                      }
-                    />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

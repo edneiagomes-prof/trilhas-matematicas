@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
     session.name = user.name;
     session.role = user.role;
     session.turmaId = user.turmaId;
+    session.nivel = user.nivel;
     await session.save();
     return NextResponse.json({ role: user.role, name: user.name });
   } catch (err) {

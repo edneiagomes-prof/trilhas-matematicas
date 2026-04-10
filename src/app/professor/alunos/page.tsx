@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getNivelInfo } from "@/lib/niveis";
 
 interface Turma {
   id: number;
@@ -11,6 +12,7 @@ interface Aluno {
   id: number;
   name: string;
   username: string;
+  nivel: number;
   turma: Turma | null;
   totalXp: number;
 }
@@ -25,6 +27,7 @@ export default function AlunosPage() {
     username: "",
     password: "",
     turmaId: "",
+    nivel: "1",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -59,7 +62,11 @@ export default function AlunosPage() {
     const res = await fetch("/api/professor/alunos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, turmaId: Number(form.turmaId) }),
+      body: JSON.stringify({
+        ...form,
+        turmaId: Number(form.turmaId),
+        nivel: Number(form.nivel),
+      }),
     });
     const data = await res.json();
     setLoading(false);
@@ -69,20 +76,10 @@ export default function AlunosPage() {
     }
     setSuccess("Aluno criado com sucesso!");
     setShowModal(false);
-    setForm({ name: "", username: "", password: "", turmaId: "" });
+    setForm({ name: "", username: "", password: "", turmaId: "", nivel: "1" });
     fetchAlunos();
     fetchTurmas();
     setTimeout(() => setSuccess(""), 3000);
-  }
-
-  function getLevel(xp: number) {
-    if (xp >= 200)
-      return { label: "Mestre", emoji: "🏆", color: "text-yellow-600" };
-    if (xp >= 100)
-      return { label: "Avançado", emoji: "⚡", color: "text-purple-600" };
-    if (xp >= 50)
-      return { label: "Intermediário", emoji: "🌟", color: "text-blue-600" };
-    return { label: "Iniciante", emoji: "🌱", color: "text-green-600" };
   }
 
   return (
@@ -123,7 +120,7 @@ export default function AlunosPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((aluno) => {
-          const level = getLevel(aluno.totalXp);
+          const nivelInfo = getNivelInfo(aluno.nivel);
           return (
             <Link
               key={aluno.id}
@@ -132,7 +129,7 @@ export default function AlunosPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl">
-                  {level.emoji}
+                  🎒
                 </div>
                 <div>
                   <div className="font-bold text-gray-800">{aluno.name}</div>
@@ -143,12 +140,12 @@ export default function AlunosPage() {
                 <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
                   {aluno.turma?.nome || "Sem turma"}
                 </span>
-                <span className={`font-bold ${level.color}`}>
+                <span className="text-yellow-600 font-bold">
                   ⭐ {aluno.totalXp} XP
                 </span>
               </div>
-              <div className={`text-xs mt-1 ${level.color} font-semibold`}>
-                {level.label}
+              <div className={`mt-2 inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${nivelInfo.badgeBg} ${nivelInfo.badgeText}`}>
+                {nivelInfo.emoji} Trilha {nivelInfo.label}
               </div>
             </Link>
           );
@@ -226,6 +223,24 @@ export default function AlunosPage() {
                       {t.nome}
                     </option>
                   ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Trilha (Nível)
+                </label>
+                <select
+                  value={form.nivel}
+                  onChange={(e) =>
+                    setForm({ ...form, nivel: e.target.value })
+                  }
+                  className="w-full border-2 border-indigo-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500"
+                  required
+                >
+                  <option value="1">⬜ Branco</option>
+                  <option value="2">🔵 Azul</option>
+                  <option value="3">🟡 Amarelo</option>
+                  <option value="4">🔴 Vermelho</option>
                 </select>
               </div>
               {error && (

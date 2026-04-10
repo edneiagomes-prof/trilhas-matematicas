@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { getNivelInfo } from "@/lib/niveis";
 
 interface Questao {
   id?: number;
@@ -31,16 +32,6 @@ interface Trilha {
   ordem: number;
   missoes: Missao[];
 }
-
-const NIVEL_INFO: Record<
-  number,
-  { emoji: string; label: string; color: string; bg: string }
-> = {
-  1: { emoji: "🌱", label: "Iniciante", color: "text-green-700", bg: "bg-green-50 border-green-300" },
-  2: { emoji: "⚡", label: "Intermediário", color: "text-blue-700", bg: "bg-blue-50 border-blue-300" },
-  3: { emoji: "🌟", label: "Avançado", color: "text-yellow-700", bg: "bg-yellow-50 border-yellow-300" },
-  4: { emoji: "🔥", label: "Expert", color: "text-red-700", bg: "bg-red-50 border-red-300" },
-};
 
 const emptyQuestao = (): Questao => ({
   enunciado: "",
@@ -232,11 +223,11 @@ export default function TrilhaDetailPage() {
       ) : (
         <div className="space-y-4">
           {trilha.missoes.map((m) => {
-            const info = NIVEL_INFO[m.nivel] ?? NIVEL_INFO[1];
+            const info = getNivelInfo(m.nivel);
             return (
               <div
                 key={m.id}
-                className={`bg-white rounded-2xl shadow p-5 border-2 ${info.bg}`}
+                className={`bg-white rounded-2xl shadow p-5 border-2 ${info.bg} ${info.border}`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
@@ -246,7 +237,7 @@ export default function TrilhaDetailPage() {
                         <span
                           className={`text-xs font-bold uppercase ${info.color}`}
                         >
-                          Nível {m.nivel} — {info.label}
+                          Trilha {info.label}
                         </span>
                         <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-0.5 rounded-full">
                           ⭐ {m.xp} XP
@@ -300,10 +291,10 @@ export default function TrilhaDetailPage() {
                   className="w-full border-2 border-indigo-200 rounded-xl px-4 py-2 focus:outline-none focus:border-indigo-500"
                   required
                 >
-                  <option value="1">🌱 Nível 1 — Iniciante</option>
-                  <option value="2">⚡ Nível 2 — Intermediário</option>
-                  <option value="3">🌟 Nível 3 — Avançado</option>
-                  <option value="4">🔥 Nível 4 — Expert</option>
+                  <option value="1">⬜ Branco</option>
+                  <option value="2">🔵 Azul</option>
+                  <option value="3">🟡 Amarelo</option>
+                  <option value="4">🔴 Vermelho</option>
                 </select>
               </div>
 

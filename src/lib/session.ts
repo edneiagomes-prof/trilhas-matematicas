@@ -21,4 +21,5 @@ export interface SessionData {
   name?: string;
   role?: string;
   turmaId?: number | null;
+  nivel?: number | null;
 }

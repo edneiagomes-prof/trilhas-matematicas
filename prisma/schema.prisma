@@ -13,6 +13,7 @@ model User {
   name       String
   password   String
   role       String
+  nivel      Int         @default(1)
   turmaId    Int?
   turma      Turma?      @relation(fields: [turmaId], references: [id])
   tentativas Tentativa[]
