@@ -47,16 +47,18 @@ model Missao {
 }
 
 model Questao {
-  id        Int    @id @default(autoincrement())
-  missaoId  Int
-  missao    Missao @relation(fields: [missaoId], references: [id])
-  enunciado String
-  opcaoA    String
-  opcaoB    String
-  opcaoC    String
-  opcaoD    String
-  correta   String
-  ordem     Int
+  id               Int    @id @default(autoincrement())
+  missaoId         Int
+  missao           Missao @relation(fields: [missaoId], references: [id])
+  enunciado        String
+  opcaoA           String
+  opcaoB           String
+  opcaoC           String
+  opcaoD           String
+  correta          String
+  ordem            Int
+  feedbackCorreto  String @default("")
+  feedbackErrado   String @default("")
 }
 
 model Tentativa {

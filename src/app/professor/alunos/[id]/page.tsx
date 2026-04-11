@@ -38,6 +38,7 @@ export default function AlunoDetailPage() {
   const [novoNivel, setNovoNivel] = useState("");
   const [nivelMsg, setNivelMsg] = useState("");
   const [nivelLoading, setNivelLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetch(`/api/professor/alunos/${params.id}`)
@@ -84,6 +85,21 @@ export default function AlunoDetailPage() {
     setTimeout(() => setNivelMsg(""), 3000);
   }
 
+  async function handleDelete() {
+    if (!aluno) return;
+    if (!confirm(`Excluir o aluno "${aluno.name}"? Esta ação não pode ser desfeita.`)) return;
+    setDeleteLoading(true);
+    const res = await fetch(`/api/professor/alunos/${params.id}`, {
+      method: "DELETE",
+    });
+    setDeleteLoading(false);
+    if (res.ok) {
+      router.push("/professor/alunos");
+    } else {
+      alert("Erro ao excluir aluno.");
+    }
+  }
+
   if (!aluno)
     return (
       <div className="text-center py-12 text-gray-400">Carregando...</div>
@@ -115,12 +131,19 @@ export default function AlunoDetailPage() {
         >
           🏠 Painel
         </Link>
+        <button
+          onClick={handleDelete}
+          disabled={deleteLoading}
+          className="ml-auto bg-red-100 hover:bg-red-200 text-red-700 font-bold px-4 py-2 rounded-xl text-sm transition-colors disabled:opacity-50"
+        >
+          {deleteLoading ? "Excluindo..." : "🗑️ Excluir Aluno"}
+        </button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="text-center">
-              <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-4xl mx-auto mb-3">
+              <div className={`w-20 h-20 ${nivelInfo.bg} rounded-full flex items-center justify-center text-4xl mx-auto mb-3 border-2 ${nivelInfo.border}`}>
                 🎒
               </div>
               <h1 className="text-2xl font-bold text-gray-800">{aluno.name}</h1>

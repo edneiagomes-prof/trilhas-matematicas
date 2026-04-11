@@ -59,6 +59,8 @@ export async function PUT(
               opcaoD: string;
               correta: string;
               ordem: number;
+              feedbackCorreto?: string;
+              feedbackErrado?: string;
             },
             i: number
           ) => ({
@@ -70,6 +72,8 @@ export async function PUT(
             opcaoD: q.opcaoD,
             correta: q.correta,
             ordem: q.ordem ?? i + 1,
+            feedbackCorreto: q.feedbackCorreto ?? "",
+            feedbackErrado: q.feedbackErrado ?? "",
           })
         ),
       });

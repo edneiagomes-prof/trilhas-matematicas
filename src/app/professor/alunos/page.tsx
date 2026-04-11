@@ -21,7 +21,9 @@ export default function AlunosPage() {
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   const [filtroTurma, setFiltroTurma] = useState<string>("all");
+  const [filtroNivel, setFiltroNivel] = useState<string>("all");
   const [showModal, setShowModal] = useState(false);
+  const [showProfModal, setShowProfModal] = useState(false);
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -29,8 +31,15 @@ export default function AlunosPage() {
     turmaId: "",
     nivel: "1",
   });
+  const [profForm, setProfForm] = useState({
+    name: "",
+    username: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
+  const [profLoading, setProfLoading] = useState(false);
   const [error, setError] = useState("");
+  const [profError, setProfError] = useState("");
   const [success, setSuccess] = useState("");
 
   async function fetchAlunos() {
@@ -50,10 +59,9 @@ export default function AlunosPage() {
     fetchTurmas();
   }, []);
 
-  const filtered =
-    filtroTurma === "all"
-      ? alunos
-      : alunos.filter((a) => a.turma?.id === Number(filtroTurma));
+  const filtered = alunos
+    .filter((a) => filtroTurma === "all" || a.turma?.id === Number(filtroTurma))
+    .filter((a) => filtroNivel === "all" || a.nivel === Number(filtroNivel));
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -82,16 +90,53 @@ export default function AlunosPage() {
     setTimeout(() => setSuccess(""), 3000);
   }
 
+  async function handleCreateProfessor(e: React.FormEvent) {
+    e.preventDefault();
+    setProfLoading(true);
+    setProfError("");
+    const res = await fetch("/api/professor/professores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(profForm),
+    });
+    const data = await res.json();
+    setProfLoading(false);
+    if (!res.ok) {
+      setProfError(data.error);
+      return;
+    }
+    setSuccess("Professor criado com sucesso!");
+    setShowProfModal(false);
+    setProfForm({ name: "", username: "", password: "" });
+    setTimeout(() => setSuccess(""), 3000);
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-indigo-700">👥 Alunos</h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl transition-colors"
-        >
-          + Novo Aluno
-        </button>
+        <div>
+          <Link
+            href="/professor"
+            className="text-sm text-indigo-600 hover:underline mb-1 inline-block"
+          >
+            ← Painel
+          </Link>
+          <h1 className="text-3xl font-bold text-indigo-700">👥 Alunos</h1>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowProfModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-5 py-2 rounded-xl transition-colors"
+          >
+            + Novo Professor
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded-xl transition-colors"
+          >
+            + Novo Aluno
+          </button>
+        </div>
       </div>
 
       {success && (
@@ -100,22 +145,40 @@ export default function AlunosPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow p-4 mb-6">
-        <label className="text-sm font-semibold text-gray-700 mr-3">
-          Filtrar por turma:
-        </label>
-        <select
-          value={filtroTurma}
-          onChange={(e) => setFiltroTurma(e.target.value)}
-          className="border-2 border-indigo-200 rounded-lg px-3 py-1 focus:outline-none focus:border-indigo-500"
-        >
-          <option value="all">Todas as turmas</option>
-          {turmas.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.nome}
-            </option>
-          ))}
-        </select>
+      <div className="bg-white rounded-2xl shadow p-4 mb-6 flex flex-wrap gap-4">
+        <div>
+          <label className="text-sm font-semibold text-gray-700 mr-3">
+            Filtrar por turma:
+          </label>
+          <select
+            value={filtroTurma}
+            onChange={(e) => setFiltroTurma(e.target.value)}
+            className="border-2 border-indigo-200 rounded-lg px-3 py-1 focus:outline-none focus:border-indigo-500"
+          >
+            <option value="all">Todas as turmas</option>
+            {turmas.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="text-sm font-semibold text-gray-700 mr-3">
+            Filtrar por nível:
+          </label>
+          <select
+            value={filtroNivel}
+            onChange={(e) => setFiltroNivel(e.target.value)}
+            className="border-2 border-indigo-200 rounded-lg px-3 py-1 focus:outline-none focus:border-indigo-500"
+          >
+            <option value="all">Todos os níveis</option>
+            <option value="1">⬜ Branco</option>
+            <option value="2">🔵 Azul</option>
+            <option value="3">🟡 Amarelo</option>
+            <option value="4">🔴 Vermelho</option>
+          </select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -125,10 +188,10 @@ export default function AlunosPage() {
             <Link
               key={aluno.id}
               href={`/professor/alunos/${aluno.id}`}
-              className="bg-white rounded-2xl shadow p-5 hover:shadow-lg transition-shadow border-2 border-transparent hover:border-indigo-300"
+              className={`bg-white rounded-2xl shadow p-5 hover:shadow-lg transition-shadow border-2 ${nivelInfo.border}`}
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl">
+                <div className={`w-12 h-12 ${nivelInfo.bg} rounded-full flex items-center justify-center text-2xl border-2 ${nivelInfo.border}`}>
                   🎒
                 </div>
                 <div>
@@ -158,6 +221,7 @@ export default function AlunosPage() {
         </div>
       )}
 
+      {/* Modal: Novo Aluno */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md overflow-y-auto max-h-[90vh]">
@@ -265,6 +329,83 @@ export default function AlunosPage() {
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {loading ? "Criando..." : "Criar Aluno"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Novo Professor */}
+      {showProfModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md overflow-y-auto max-h-[90vh]">
+            <h2 className="text-2xl font-bold text-purple-700 mb-6">
+              🧑‍🏫 Criar Novo Professor
+            </h2>
+            <form onSubmit={handleCreateProfessor} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  value={profForm.name}
+                  onChange={(e) => setProfForm({ ...profForm, name: e.target.value })}
+                  className="w-full border-2 border-purple-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Usuário
+                </label>
+                <input
+                  type="text"
+                  value={profForm.username}
+                  onChange={(e) =>
+                    setProfForm({ ...profForm, username: e.target.value })
+                  }
+                  className="w-full border-2 border-purple-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Senha Inicial
+                </label>
+                <input
+                  type="password"
+                  value={profForm.password}
+                  onChange={(e) =>
+                    setProfForm({ ...profForm, password: e.target.value })
+                  }
+                  className="w-full border-2 border-purple-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500"
+                  required
+                />
+              </div>
+              {profError && (
+                <div className="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm">
+                  {profError}
+                </div>
+              )}
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfModal(false);
+                    setProfError("");
+                  }}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 font-bold py-2 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={profLoading}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-xl transition-colors disabled:opacity-50"
+                >
+                  {profLoading ? "Criando..." : "Criar Professor"}
                 </button>
               </div>
             </form>
