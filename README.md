@@ -56,20 +56,29 @@ npm run seed
 ## Funcionalidades
 
 - **Login** com sessão segura (iron-session)
-- **Painel do Professor**: visão geral de turmas, alunos e XP, criação de alunos, redefinição de senhas
-- **Painel do Aluno**: trilhas de aventura gamificadas com 4 semanas × 4 missões × 4 questões
-- **Quiz interativo**: responda questões de múltipla escolha e ganhe XP
-- **Progresso visual**: barra de XP, níveis (Aprendiz → Explorador → Estrategista → Mestre)
+- **Painel do Professor**:
+  - Visão geral de turmas, alunos e XP
+  - Criação de alunos com nível inicial e turma
+  - Criação de novos professores
+  - Exclusão de alunos
+  - Redefinição de senhas e alteração de trilha (nível) do aluno
+  - Filtro por turma e por nível
+  - Criação e edição de missões com questões e feedbacks personalizados
+- **Painel do Aluno**: trilhas de aventura gamificadas com 4 semanas × 4 missões, filtradas pelo nível do aluno
+- **Quiz interativo**: responda questões de múltipla escolha, ganhe XP e veja feedbacks personalizados
+- **Trilhas coloridas por nível**: ⬜ Branco → 🔵 Azul → 🟡 Amarelo → 🔴 Vermelho
 
 ## Estrutura
 
 ```
 src/
-  app/           # Páginas e rotas Next.js 14 (App Router)
+  app/           # Páginas e rotas Next.js 15 (App Router)
   components/    # Componentes reutilizáveis
   lib/           # Prisma, sessão e autenticação
 prisma/
   schema.prisma  # Esquema do banco de dados (SQLite)
-  seed.ts        # Dados iniciais
+  seed.js        # Dados iniciais
+scripts/
+  start.sh       # Script de inicialização (migrações + seed + next start)
 ```
 Plataforma gamificada para estudantes do 3º ano fundamental
