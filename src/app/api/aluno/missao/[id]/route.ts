@@ -27,8 +27,7 @@ export async function GET(
     );
 
   // Check if the mission or its parent trilha is locked
-  const trilha = await prisma.trilha.findUnique({ where: { id: missao.trilhaId } });
-  if (missao.bloqueada || trilha?.bloqueada) {
+  if (missao.bloqueada || missao.trilha.bloqueada) {
     return NextResponse.json(
       { error: "Esta missão está bloqueada pelo professor" },
       { status: 403 }

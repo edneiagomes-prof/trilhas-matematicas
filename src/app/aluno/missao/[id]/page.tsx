@@ -52,6 +52,10 @@ export default function MissaoPage() {
           setErro("bloqueada");
           return null;
         }
+        if (!r.ok) {
+          setErro("erro");
+          return null;
+        }
         return r.json();
       })
       .then((data) => {
