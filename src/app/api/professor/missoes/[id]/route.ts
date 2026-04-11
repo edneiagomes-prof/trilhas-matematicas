@@ -13,6 +13,39 @@ async function requireTeacherSession() {
   return session;
 }
 
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await requireTeacherSession();
+  if (!session)
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+
+  const { id } = await params;
+  const missaoId = Number(id);
+
+  try {
+    const { bloqueada } = await req.json();
+    if (typeof bloqueada !== "boolean") {
+      return NextResponse.json(
+        { error: "Campo 'bloqueada' deve ser boolean" },
+        { status: 400 }
+      );
+    }
+    const missao = await prisma.missao.update({
+      where: { id: missaoId },
+      data: { bloqueada },
+    });
+    return NextResponse.json(missao);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Erro ao atualizar missão" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

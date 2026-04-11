@@ -25,5 +25,15 @@ export async function GET(
       { error: "Missão não encontrada" },
       { status: 404 }
     );
+
+  // Check if the mission or its parent trilha is locked
+  const trilha = await prisma.trilha.findUnique({ where: { id: missao.trilhaId } });
+  if (missao.bloqueada || trilha?.bloqueada) {
+    return NextResponse.json(
+      { error: "Esta missão está bloqueada pelo professor" },
+      { status: 403 }
+    );
+  }
+
   return NextResponse.json(missao);
 }

@@ -8,6 +8,7 @@ interface Trilha {
   titulo: string;
   semana: number;
   ordem: number;
+  bloqueada: boolean;
   _count: { missoes: number };
 }
 
@@ -83,6 +84,22 @@ export default function TrilhasPage() {
     setTimeout(() => setSuccess(""), 3000);
   }
 
+  async function handleToggleLock(t: Trilha) {
+    const action = t.bloqueada ? "desbloquear" : "bloquear";
+    if (!confirm(`Deseja ${action} a trilha "${t.titulo}"?`)) return;
+
+    const res = await fetch(`/api/professor/trilhas/${t.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bloqueada: !t.bloqueada }),
+    });
+    if (res.ok) {
+      setSuccess(t.bloqueada ? "Trilha desbloqueada!" : "Trilha bloqueada!");
+      fetchTrilhas();
+      setTimeout(() => setSuccess(""), 3000);
+    }
+  }
+
   async function handleDelete(t: Trilha) {
     if (
       !confirm(
@@ -136,11 +153,18 @@ export default function TrilhasPage() {
           {trilhas.map((t) => (
             <div
               key={t.id}
-              className="bg-white rounded-2xl shadow p-5 border-2 border-transparent hover:border-indigo-200 transition-all"
+              className={`bg-white rounded-2xl shadow p-5 border-2 transition-all ${
+                t.bloqueada
+                  ? "border-red-200 opacity-75"
+                  : "border-transparent hover:border-indigo-200"
+              }`}
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800">{t.titulo}</h2>
+                  <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    {t.bloqueada && <span title="Bloqueada">🔒</span>}
+                    {t.titulo}
+                  </h2>
                   <div className="text-sm text-gray-500 mt-0.5">
                     Semana {t.semana} · Ordem {t.ordem}
                   </div>
@@ -156,6 +180,17 @@ export default function TrilhasPage() {
                 >
                   🎯 Ver Missões
                 </Link>
+                <button
+                  onClick={() => handleToggleLock(t)}
+                  className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
+                    t.bloqueada
+                      ? "bg-green-100 hover:bg-green-200 text-green-700"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                  }`}
+                  title={t.bloqueada ? "Desbloquear trilha" : "Bloquear trilha"}
+                >
+                  {t.bloqueada ? "🔓" : "🔒"}
+                </button>
                 <button
                   onClick={() => openEdit(t)}
                   className="px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-xl text-sm font-bold transition-colors"

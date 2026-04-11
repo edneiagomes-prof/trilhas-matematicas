@@ -15,13 +15,20 @@ export async function POST(req: NextRequest) {
     await req.json();
   const missao = await prisma.missao.findUnique({
     where: { id: Number(missaoId) },
-    include: { questoes: true },
+    include: { questoes: true, trilha: true },
   });
   if (!missao)
     return NextResponse.json(
       { error: "Missão não encontrada" },
       { status: 404 }
     );
+
+  if (missao.bloqueada || missao.trilha.bloqueada) {
+    return NextResponse.json(
+      { error: "Esta missão está bloqueada pelo professor" },
+      { status: 403 }
+    );
+  }
 
   let acertos = 0;
   for (const q of missao.questoes) {

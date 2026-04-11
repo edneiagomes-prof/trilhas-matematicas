@@ -97,10 +97,13 @@ export default async function AlunoDashboard() {
           const missoesCompletas = trilha.missoes.filter(
             (m) => m.tentativas.length > 0
           ).length;
+          const trilhaBloqueada = trilha.bloqueada;
           return (
             <div
               key={trilha.id}
-              className={`bg-white rounded-3xl shadow-lg overflow-hidden border-2 ${info.border}`}
+              className={`bg-white rounded-3xl shadow-lg overflow-hidden border-2 ${info.border} ${
+                trilhaBloqueada ? "opacity-60" : ""
+              }`}
             >
               <div
                 className={`bg-gradient-to-r ${info.cor} text-white p-5`}
@@ -112,6 +115,11 @@ export default async function AlunoDashboard() {
                     <span className="ml-3 text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
                       Semana {trilha.semana}
                     </span>
+                    {trilhaBloqueada && (
+                      <span className="ml-3 text-sm bg-white bg-opacity-30 px-3 py-1 rounded-full font-bold">
+                        🔒 Bloqueada
+                      </span>
+                    )}
                   </div>
                   <div className="text-right text-sm">
                     <div className="font-bold">
@@ -125,6 +133,27 @@ export default async function AlunoDashboard() {
                   const tentativa = missao.tentativas[0];
                   const feita = !!tentativa;
                   const mNivelInfo = getNivelInfo(missao.nivel);
+                  const bloqueada = trilhaBloqueada || missao.bloqueada;
+                  if (bloqueada) {
+                    return (
+                      <div
+                        key={missao.id}
+                        className="rounded-2xl p-4 text-center border-2 bg-gray-100 border-gray-300 cursor-not-allowed select-none"
+                        title="Missão bloqueada pelo professor"
+                      >
+                        <div className="text-2xl mb-1">🔒</div>
+                        <div className="text-xs font-bold mb-1 text-gray-400">
+                          Bloqueada
+                        </div>
+                        <div className="text-sm font-semibold text-gray-400 leading-tight">
+                          {missao.titulo}
+                        </div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          {missao.xp} XP
+                        </div>
+                      </div>
+                    );
+                  }
                   return (
                     <Link
                       key={missao.id}
