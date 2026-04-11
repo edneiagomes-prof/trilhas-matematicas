@@ -32,6 +32,26 @@ export async function GET(
   return NextResponse.json(user);
 }
 
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getIronSession<SessionData>(await cookies(), sessionOptions);
+  if (!session.userId || session.role !== "teacher") {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+  const { id } = await params;
+  const userId = Number(id);
+  try {
+    await prisma.tentativa.deleteMany({ where: { userId } });
+    await prisma.user.delete({ where: { id: userId, role: "student" } });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Erro ao excluir aluno" }, { status: 500 });
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

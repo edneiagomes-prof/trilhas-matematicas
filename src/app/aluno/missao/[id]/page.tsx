@@ -13,6 +13,8 @@ interface Questao {
   opcaoD: string;
   correta: string;
   ordem: number;
+  feedbackCorreto: string;
+  feedbackErrado: string;
 }
 
 interface Missao {
@@ -165,14 +167,28 @@ export default function MissaoPage() {
                   </div>
                   <div className="text-xs mt-1">
                     {acertou ? (
-                      <span className="text-green-600">
-                        ✅ Sua resposta: {resposta} (Correta!)
-                      </span>
+                      <>
+                        <span className="text-green-600">
+                          ✅ Sua resposta: {resposta} (Correta!)
+                        </span>
+                        {q.feedbackCorreto && (
+                          <p className="mt-1 text-green-700 bg-green-100 rounded-lg px-2 py-1">
+                            {q.feedbackCorreto}
+                          </p>
+                        )}
+                      </>
                     ) : (
-                      <span className="text-red-600">
-                        ❌ Sua resposta: {resposta || "—"} | Correta:{" "}
-                        {q.correta}
-                      </span>
+                      <>
+                        <span className="text-red-600">
+                          ❌ Sua resposta: {resposta || "—"} | Correta:{" "}
+                          {q.correta}
+                        </span>
+                        {q.feedbackErrado && (
+                          <p className="mt-1 text-red-700 bg-red-100 rounded-lg px-2 py-1">
+                            {q.feedbackErrado}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

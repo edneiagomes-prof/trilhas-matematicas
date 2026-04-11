@@ -14,6 +14,8 @@ interface Questao {
   opcaoD: string;
   correta: string;
   ordem: number;
+  feedbackCorreto: string;
+  feedbackErrado: string;
 }
 
 interface Missao {
@@ -41,6 +43,8 @@ const emptyQuestao = (): Questao => ({
   opcaoD: "",
   correta: "A",
   ordem: 1,
+  feedbackCorreto: "",
+  feedbackErrado: "",
 });
 
 const emptyMissaoForm = () => ({
@@ -91,7 +95,11 @@ export default function TrilhaDetailPage() {
       xp: String(m.xp),
       questoes:
         m.questoes.length > 0
-          ? m.questoes.map((q) => ({ ...q }))
+          ? m.questoes.map((q) => ({
+              ...q,
+              feedbackCorreto: q.feedbackCorreto ?? "",
+              feedbackErrado: q.feedbackErrado ?? "",
+            }))
           : [emptyQuestao()],
     });
     setError("");
@@ -444,6 +452,37 @@ export default function TrilhaDetailPage() {
                           <option value="C">C</option>
                           <option value="D">D</option>
                         </select>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-green-700 mb-1">
+                            ✅ Feedback (resposta correta)
+                          </label>
+                          <input
+                            type="text"
+                            value={q.feedbackCorreto}
+                            onChange={(e) =>
+                              updateQuestao(idx, "feedbackCorreto", e.target.value)
+                            }
+                            className="w-full border-2 border-green-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-green-400"
+                            placeholder="Ex: Muito bem! Você acertou!"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-red-700 mb-1">
+                            ❌ Feedback (resposta errada)
+                          </label>
+                          <input
+                            type="text"
+                            value={q.feedbackErrado}
+                            onChange={(e) =>
+                              updateQuestao(idx, "feedbackErrado", e.target.value)
+                            }
+                            className="w-full border-2 border-red-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-red-400"
+                            placeholder="Ex: Não foi dessa vez. Tente novamente!"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
