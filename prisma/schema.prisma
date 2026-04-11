@@ -27,11 +27,12 @@ model Turma {
 }
 
 model Trilha {
-  id      Int      @id @default(autoincrement())
-  titulo  String
-  semana  Int
-  ordem   Int
-  missoes Missao[]
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  semana    Int
+  ordem     Int
+  bloqueada Boolean  @default(false)
+  missoes   Missao[]
 }
 
 model Missao {
@@ -42,6 +43,7 @@ model Missao {
   titulo     String
   descricao  String
   xp         Int
+  bloqueada  Boolean     @default(false)
   questoes   Questao[]
   tentativas Tentativa[]
 }

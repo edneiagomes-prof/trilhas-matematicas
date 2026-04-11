@@ -47,8 +47,20 @@ export default function MissaoPage() {
 
   useEffect(() => {
     fetch(`/api/aluno/missao/${params.id}`)
-      .then((r) => r.json())
-      .then(setMissao);
+      .then((r) => {
+        if (r.status === 403) {
+          setErro("bloqueada");
+          return null;
+        }
+        if (!r.ok) {
+          setErro("erro");
+          return null;
+        }
+        return r.json();
+      })
+      .then((data) => {
+        if (data) setMissao(data);
+      });
   }, [params.id]);
 
   function handleResposta(questaoId: number, opcao: string) {
@@ -78,6 +90,28 @@ export default function MissaoPage() {
     }
     setResultado(data);
   }
+
+  if (erro === "bloqueada")
+    return (
+      <div className="max-w-2xl mx-auto">
+        <button
+          onClick={() => router.push("/aluno")}
+          className="text-indigo-600 hover:underline mb-4 flex items-center gap-1"
+        >
+          ← Voltar às trilhas
+        </button>
+        <div className="bg-white rounded-3xl shadow-lg p-12 text-center">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold text-gray-700 mb-2">
+            Missão Bloqueada
+          </h2>
+          <p className="text-gray-500">
+            Esta missão está bloqueada pelo professor. Aguarde ser liberada para
+            continuar.
+          </p>
+        </div>
+      </div>
+    );
 
   if (!missao)
     return (

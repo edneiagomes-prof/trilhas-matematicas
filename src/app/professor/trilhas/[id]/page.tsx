@@ -24,6 +24,7 @@ interface Missao {
   titulo: string;
   descricao: string;
   xp: number;
+  bloqueada: boolean;
   questoes: Questao[];
 }
 
@@ -173,6 +174,22 @@ export default function TrilhaDetailPage() {
     setTimeout(() => setSuccess(""), 3000);
   }
 
+  async function handleToggleLock(m: Missao) {
+    const action = m.bloqueada ? "desbloquear" : "bloquear";
+    if (!confirm(`Deseja ${action} a missão "${m.titulo}"?`)) return;
+
+    const res = await fetch(`/api/professor/missoes/${m.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bloqueada: !m.bloqueada }),
+    });
+    if (res.ok) {
+      setSuccess(m.bloqueada ? "Missão desbloqueada!" : "Missão bloqueada!");
+      fetchTrilha();
+      setTimeout(() => setSuccess(""), 3000);
+    }
+  }
+
   async function handleDelete(m: Missao) {
     if (!confirm(`Excluir a missão "${m.titulo}"?`)) return;
     const res = await fetch(`/api/professor/missoes/${m.id}`, {
@@ -243,7 +260,9 @@ export default function TrilhaDetailPage() {
             return (
               <div
                 key={m.id}
-                className={`bg-white rounded-2xl shadow p-5 border-2 ${info.bg} ${info.border}`}
+                className={`bg-white rounded-2xl shadow p-5 border-2 ${info.bg} ${info.border} ${
+                  m.bloqueada ? "opacity-75" : ""
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
@@ -261,6 +280,11 @@ export default function TrilhaDetailPage() {
                         <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
                           {m.questoes.length} questões
                         </span>
+                        {m.bloqueada && (
+                          <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                            🔒 Bloqueada
+                          </span>
+                        )}
                       </div>
                       <h3 className="text-lg font-bold text-gray-800 mt-0.5">
                         {m.titulo}
@@ -269,6 +293,17 @@ export default function TrilhaDetailPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => handleToggleLock(m)}
+                      className={`px-3 py-2 rounded-xl text-sm font-bold transition-colors ${
+                        m.bloqueada
+                          ? "bg-green-100 hover:bg-green-200 text-green-700"
+                          : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                      }`}
+                      title={m.bloqueada ? "Desbloquear missão" : "Bloquear missão"}
+                    >
+                      {m.bloqueada ? "🔓" : "🔒"}
+                    </button>
                     <button
                       onClick={() => openEdit(m)}
                       className="px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-xl text-sm font-bold transition-colors"

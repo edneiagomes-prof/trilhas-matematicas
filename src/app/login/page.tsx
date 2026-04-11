@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -55,14 +56,24 @@ export default function LoginPage() {
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Senha
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 text-gray-800"
-              placeholder="Digite sua senha"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border-2 border-indigo-200 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-indigo-500 text-gray-800"
+                placeholder="Digite sua senha"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors text-xl"
+                aria-label={showPassword ? "Ocultar senha" : "Ver senha"}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl text-sm">
