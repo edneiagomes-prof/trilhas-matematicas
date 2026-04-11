@@ -192,7 +192,7 @@ export default function AlunosPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className={`w-12 h-12 ${nivelInfo.bg} rounded-full flex items-center justify-center text-2xl border-2 ${nivelInfo.border}`}>
-                  🎒
+                  <span style={{ filter: "grayscale(100%)" }}>🎒</span>
                 </div>
                 <div>
                   <div className="font-bold text-gray-800">{aluno.name}</div>

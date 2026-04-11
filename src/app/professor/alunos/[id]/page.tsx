@@ -144,7 +144,7 @@ export default function AlunoDetailPage() {
           <div className="bg-white rounded-2xl shadow p-6">
             <div className="text-center">
               <div className={`w-20 h-20 ${nivelInfo.bg} rounded-full flex items-center justify-center text-4xl mx-auto mb-3 border-2 ${nivelInfo.border}`}>
-                🎒
+                <span style={{ filter: "grayscale(100%)" }}>🎒</span>
               </div>
               <h1 className="text-2xl font-bold text-gray-800">{aluno.name}</h1>
               <p className="text-gray-500">@{aluno.username}</p>
